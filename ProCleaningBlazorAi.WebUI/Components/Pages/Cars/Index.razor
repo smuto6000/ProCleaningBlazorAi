@@ -7,12 +7,12 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-<PageTitle>Autá | ProCleaning</PageTitle>
+<PageTitle>@LangCars.Title_Index | ProCleaning</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="page-title mb-0">Autá</h1>
+    <h1 class="page-title mb-0">@LangCars.Title_Index</h1>
     <a href="cars/new" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-2"></i> Pridať auto
+        <i class="bi bi-plus-lg me-2"></i> @LangCars.Btn_Add
     </a>
 </div>
 
@@ -22,13 +22,13 @@
         {
             <div class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <span class="visually-hidden">@SharedResource.Loading</span>
                 </div>
             </div>
         }
         else if (!items.Any())
         {
-            <p class="text-muted text-center my-4">Žiadne autá sa nenašli.</p>
+            <p class="text-muted text-center my-4">@SharedResource.Msg_NoRecords</p>
         }
         else
         {
@@ -36,11 +36,11 @@
                 <table class="table table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Model</th>
-                            <th>ŠPZ</th>
-                            <th>VIN</th>
-                            <th>Platnosť do</th>
-                            <th class="text-end">Akcie</th>
+                            <th>@SharedResource.Label_Model</th>
+                            <th>@SharedResource.Label_Plate</th>
+                            <th>@LangCars.Label_Vin</th>
+                            <th>@SharedResource.Label_ValidTo</th>
+                            <th class="text-end">@SharedResource.Col_Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,10 +52,10 @@
                                 <td>@item.Vin</td>
                                 <td>@item.ValidTo?.ToShortDateString()</td>
                                 <td class="text-end">
-                                    <a href="cars/edit/@item.Id" class="btn-icon text-primary" title="Upraviť">
+                                    <a href="cars/edit/@item.Id" class="btn-icon text-primary" title="@SharedResource.Btn_Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <button class="btn-icon text-danger" @onclick="() => Delete(item.Id)" title="Vymazať">
+                                    <button class="btn-icon text-danger" @onclick="() => Delete(item.Id)" title="@SharedResource.Btn_Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>
@@ -83,7 +83,7 @@
 
     private async Task Delete(Guid id)
     {
-        if (!await JS.InvokeAsync<bool>("confirm", "Naozaj chcete vymazať toto auto?"))
+        if (!await JS.InvokeAsync<bool>("confirm", LangCars.Msg_ConfirmDelete))
         {
             return;
         }

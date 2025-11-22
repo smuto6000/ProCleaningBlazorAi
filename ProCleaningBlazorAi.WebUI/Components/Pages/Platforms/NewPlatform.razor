@@ -2,61 +2,64 @@
 @using Microsoft.AspNetCore.Authorization
 @using ProCleaningBlazorAi.Application.DTOs
 @using ProCleaningBlazorAi.Application.Interfaces.Services
+@using Resources
 @attribute [Authorize(Roles = "Admin,Manager")]
 @inject IPlatformService Service
 @inject NavigationManager Navigation
 
-<PageTitle>Nová plošina | ProCleaning</PageTitle>
+<PageTitle>@LangPlatforms.Title_New | ProCleaning</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="page-title mb-0">Nová plošina</h1>
+    <h1 class="page-title mb-0">@LangPlatforms.Title_New</h1>
 </div>
 
 <div class="card shadow-sm">
     <div class="card-body p-4">
         <EditForm Model="@model" OnValidSubmit="HandleSubmit">
-            <DataAnnotationsValidator />
+            <Blazored.FluentValidation.FluentValidationValidator />
             
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="form-floating">
-                        <InputText id="model" class="form-control" @bind-Value="model.Model" placeholder="Model" />
-                        <label for="model">Model</label>
+                        <InputText id="model" class="form-control" @bind-Value="model.Model" placeholder="@SharedResource.Label_Model" />
+                        <label for="model">@SharedResource.Label_Model</label>
+                        <ValidationMessage For="@(() => model.Model)" />
                     </div>
                 </div>
                 
                 <div class="col-md-6">
                     <div class="form-floating">
-                        <InputText id="plate" class="form-control" @bind-Value="model.Plate" placeholder="ŠPZ" />
-                        <label for="plate">ŠPZ</label>
+                        <InputText id="plate" class="form-control" @bind-Value="model.Plate" placeholder="@SharedResource.Label_Plate" />
+                        <label for="plate">@SharedResource.Label_Plate</label>
+                        <ValidationMessage For="@(() => model.Plate)" />
                     </div>
                 </div>
                 
                 <div class="col-md-4">
                     <div class="form-floating">
                         <InputDate id="validTo" class="form-control" @bind-Value="model.ValidTo" />
-                        <label for="validTo">Platnosť do</label>
+                        <label for="validTo">@SharedResource.Label_ValidTo</label>
                     </div>
                 </div>
 
                 <div class="col-md-4">
                     <div class="form-floating">
                         <InputDate id="emission" class="form-control" @bind-Value="model.EmissionControlValidTo" />
-                        <label for="emission">Emisná kontrola do</label>
+                        <label for="emission">@SharedResource.Label_EmissionValidTo</label>
                     </div>
                 </div>
 
                 <div class="col-md-4">
                     <div class="form-floating">
                         <InputDate id="service" class="form-control" @bind-Value="model.ServiceValidTo" />
-                        <label for="service">Servisná prehliadka do</label>
+                        <label for="service">@SharedResource.Label_ServiceValidTo</label>
                     </div>
                 </div>
             </div>
 
             <div class="mt-4 d-flex gap-2">
-                <button type="submit" class="btn btn-primary px-4">Uložiť</button>
-                <a href="platforms" class="btn btn-light px-4">Zrušiť</a>
+                <button type="submit" class="btn btn-primary px-4">@SharedResource.Btn_Save</button>
+                <a href="platforms" class="btn btn-light px-4">@SharedResource.Btn_Cancel</a>
             </div>
         </EditForm>
     </div>

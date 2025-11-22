@@ -36,6 +36,7 @@ builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddValidatorsFromAssemblyContaining<IAuthService>();
 // Registrácia Validátorov z WebUI (napr. UserCreateDtoValidator)
 builder.Services.AddValidatorsFromAssemblyContaining<ProCleaningBlazorAi.WebUI.Validators.UserCreateDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ProCleaningBlazorAi.WebUI.Validators.CarCreateDtoValidator>();
 
 
 // ...
