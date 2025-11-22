@@ -1,0 +1,150 @@
+@page "/login"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@attribute [AllowAnonymous]
+@layout Layout.LoginLayout
+@using Resources
+@using ProCleaningBlazorAi.WebUI.ViewModels
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>@Resources.SharedResource.Login_Title | ProCleaning</PageTitle>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-brand">
+            <div class="brand-logo">PC</div>
+            <h1>ProCleaning</h1>
+            <p class="text-muted">@Resources.SharedResource.Login_Subtitle</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @errorMessage
+            </div>
+        }
+
+        <!-- Blazor Validated Form -->
+        <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+            <Blazored.FluentValidation.FluentValidationValidator />
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">@Resources.SharedResource.Login_EmailLabel</label>
+                <InputText id="email" class="form-control" @bind-Value="model.Email" placeholder="name@company.com" />
+                <ValidationMessage For="@(() => model.Email)" />
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="password" class="form-label mb-0">@Resources.SharedResource.Login_PasswordLabel</label>
+                    <a href="#" class="small text-muted">@Resources.SharedResource.Login_ForgotPassword</a>
+                </div>
+                <InputText id="password" type="password" class="form-control mt-2" @bind-Value="model.Password" placeholder="••••••••" />
+                <ValidationMessage For="@(() => model.Password)" />
+            </div>
+
+            <div class="mb-4 form-check">
+                <InputCheckbox id="rememberMe" class="form-check-input darker-border-checkbox" @bind-Value="model.RememberMe" />
+                <label class="form-check-label text-muted" for="rememberMe">
+                    @Resources.SharedResource.Login_RememberMe
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2">
+                @Resources.SharedResource.Login_Button
+            </button>
+        </EditForm>
+        
+        <!-- Hidden Real Post Form -->
+        <form id="realLoginForm" method="post" action="/account/login" style="display:none">
+            <AntiforgeryToken />
+            <input type="hidden" name="email" value="@model.Email" />
+            <input type="hidden" name="password" value="@model.Password" />
+            <input type="hidden" name="rememberMe" value="@model.RememberMe.ToString()" />
+        </form>
+        
+        <div class="login-footer text-center mt-4 text-muted small">
+            &copy; @DateTime.Now.Year @Resources.SharedResource.Login_FooterCopyright
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Špecifické štýly len pre Login, zvyšok ťahá z app.css */
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: var(--body-bg);
+    }
+
+    .login-card {
+        background: var(--surface);
+        padding: 3rem;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 24px 0 rgba(67, 89, 113, 0.1);
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .brand-logo {
+        width: 48px;
+        height: 48px;
+        background-color: var(--primary);
+        color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin: 0 auto 1rem auto;
+    }
+
+    .login-brand {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .login-brand h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<script>
+    function submitRealForm() {
+        document.getElementById('realLoginForm').submit();
+    }
+</script>
+
+@code {
+    private LoginViewModel model = new();
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("error", out var error))
+        {
+            if (error == "invalid_credentials")
+            {
+                errorMessage = Resources.SharedResource.Error_InvalidCredentials;
+            }
+            else
+            {
+                errorMessage = Resources.SharedResource.Error_ConnectionFailed;
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Ak je formulár validný (FluentValidation prešiel), odošleme reálny POST
+        await JS.InvokeVoidAsync("submitRealForm");
+    }
+}

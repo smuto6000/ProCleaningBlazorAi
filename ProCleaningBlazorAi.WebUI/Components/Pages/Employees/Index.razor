@@ -1,0 +1,99 @@
+@page "/employees"
+@using Microsoft.AspNetCore.Authorization
+@using ProCleaningBlazorAi.Application.DTOs
+@using ProCleaningBlazorAi.Application.Interfaces.Services
+@using ProCleaningBlazorAi.WebUI.Resources
+@attribute [Authorize(Roles = "Admin,Manager")]
+@inject IUserService UserService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>@LangUser.Title_Index | ProCleaning</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">@LangUser.Title_Index</h1>
+    <a href="employees/new" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i> @LangUser.Btn_Add
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (users == null)
+        {
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (!users.Any())
+        {
+            <p class="text-muted text-center my-4">Žiadni zamestnanci sa nenašli.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>@LangUser.Col_FirstName</th>
+                            <th>@LangUser.Col_LastName</th>
+                            <th>@LangUser.Col_Email</th>
+                            <th>@(string.IsNullOrEmpty(LangUser.Col_Role) ? "Rola" : LangUser.Col_Role)</th>
+                            <th class="text-end">@(string.IsNullOrEmpty(LangUser.Col_Actions) ? "Akcie" : LangUser.Col_Actions)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in users)
+                        {
+                            <tr>
+                                <td>@user.FirstName</td>
+                                <td>@user.LastName</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <span class="badge bg-label-primary">
+                                        @(string.IsNullOrEmpty(user.Role) ? "-" : user.Role)
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="employees/edit/@user.Id" class="btn-icon text-primary" title="Upraviť">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button class="btn-icon text-danger" @onclick="() => DeleteUser(user.Id)" title="Vymazať">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<UserDetailDto>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await UserService.GetAllAsync();
+    }
+
+    private async Task DeleteUser(Guid id)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", LangUser.Msg_ConfirmDelete))
+        {
+            return;
+        }
+
+        await UserService.DeleteAsync(id);
+        await LoadUsers();
+    }
+}

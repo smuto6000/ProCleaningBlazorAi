@@ -1,0 +1,108 @@
+@page "/platforms/edit/{Id:guid}"
+@using Microsoft.AspNetCore.Authorization
+@using ProCleaningBlazorAi.Application.DTOs
+@using ProCleaningBlazorAi.Application.Interfaces.Services
+@attribute [Authorize(Roles = "Admin,Manager")]
+@inject IPlatformService Service
+@inject NavigationManager Navigation
+
+<PageTitle>Úprava plošiny | ProCleaning</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">Úprava plošiny</h1>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        @if (model == null)
+        {
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <InputText id="model" class="form-control" @bind-Value="model.Model" placeholder="Model" />
+                            <label for="model">Model</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <InputText id="plate" class="form-control" @bind-Value="model.Plate" placeholder="ŠPZ" />
+                            <label for="plate">ŠPZ</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputDate id="validTo" class="form-control" @bind-Value="model.ValidTo" />
+                            <label for="validTo">Platnosť do</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputDate id="emission" class="form-control" @bind-Value="model.EmissionControlValidTo" />
+                            <label for="emission">Emisná kontrola do</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputDate id="service" class="form-control" @bind-Value="model.ServiceValidTo" />
+                            <label for="service">Servisná prehliadka do</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">Uložiť</button>
+                    <a href="platforms" class="btn btn-light px-4">Zrušiť</a>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private PlatformUpdateDto? model;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var item = await Service.GetByIdAsync(Id);
+        if (item != null)
+        {
+            model = new PlatformUpdateDto
+            {
+                Id = item.Id,
+                Model = item.Model,
+                Plate = item.Plate,
+                ValidTo = item.ValidTo,
+                EmissionControlValidTo = item.EmissionControlValidTo,
+                ServiceValidTo = item.ServiceValidTo
+            };
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (model != null)
+        {
+            await Service.UpdateAsync(model);
+            Navigation.NavigateTo("platforms");
+        }
+    }
+}
+

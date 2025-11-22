@@ -1,0 +1,100 @@
+@page "/employees/new"
+@using Microsoft.AspNetCore.Authorization
+@using ProCleaningBlazorAi.Application.DTOs
+@using ProCleaningBlazorAi.Application.Interfaces.Services
+@using ProCleaningBlazorAi.Domain.Entities
+@using ProCleaningBlazorAi.WebUI.Resources
+@attribute [Authorize(Roles = "Admin,Manager")]
+@inject IUserService UserService
+@inject NavigationManager Navigation
+
+<PageTitle>@LangUser.Title_New | ProCleaning</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title mb-1">@LangUser.Title_New</h1>
+        <p class="text-muted mb-0">Vytvorte nového používateľa systému.</p>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+            <Blazored.FluentValidation.FluentValidationValidator />
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="firstName" class="form-control" @bind-Value="model.FirstName" placeholder="Meno" />
+                        <label for="firstName">@LangUser.Col_FirstName</label>
+                        <ValidationMessage For="@(() => model.FirstName)" />
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="lastName" class="form-control" @bind-Value="model.LastName" placeholder="Priezvisko" />
+                        <label for="lastName">@LangUser.Col_LastName</label>
+                        <ValidationMessage For="@(() => model.LastName)" />
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="email" class="form-control" @bind-Value="model.Email" placeholder="Email" />
+                        <label for="email">@LangUser.Col_Email</label>
+                        <ValidationMessage For="@(() => model.Email)" />
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="password" type="password" class="form-control" @bind-Value="model.Password" placeholder="Heslo" />
+                        <label for="password">@LangUser.Label_Password</label>
+                        <ValidationMessage For="@(() => model.Password)" />
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputSelect id="role" class="form-select" @bind-Value="model.RoleId">
+                            @foreach (var role in roles)
+                            {
+                                <option value="@role.Id">@role.DisplayName</option>
+                            }
+                        </InputSelect>
+                        <label for="role">@LangUser.Col_Role</label>
+                        <ValidationMessage For="@(() => model.RoleId)" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check-lg me-2"></i> @LangUser.Btn_Save
+                </button>
+                <a href="employees" class="btn btn-light px-4">@LangUser.Btn_Cancel</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private UserCreateDto model = new();
+    private List<Role> roles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await UserService.GetRolesAsync();
+        if (roles.Any())
+        {
+            model.RoleId = roles.First().Id;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        await UserService.CreateAsync(model);
+        Navigation.NavigateTo("employees");
+    }
+}

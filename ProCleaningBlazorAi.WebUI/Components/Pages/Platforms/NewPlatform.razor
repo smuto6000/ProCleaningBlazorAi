@@ -1,0 +1,74 @@
+@page "/platforms/new"
+@using Microsoft.AspNetCore.Authorization
+@using ProCleaningBlazorAi.Application.DTOs
+@using ProCleaningBlazorAi.Application.Interfaces.Services
+@attribute [Authorize(Roles = "Admin,Manager")]
+@inject IPlatformService Service
+@inject NavigationManager Navigation
+
+<PageTitle>Nová plošina | ProCleaning</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">Nová plošina</h1>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="model" class="form-control" @bind-Value="model.Model" placeholder="Model" />
+                        <label for="model">Model</label>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="plate" class="form-control" @bind-Value="model.Plate" placeholder="ŠPZ" />
+                        <label for="plate">ŠPZ</label>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <InputDate id="validTo" class="form-control" @bind-Value="model.ValidTo" />
+                        <label for="validTo">Platnosť do</label>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <InputDate id="emission" class="form-control" @bind-Value="model.EmissionControlValidTo" />
+                        <label for="emission">Emisná kontrola do</label>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <InputDate id="service" class="form-control" @bind-Value="model.ServiceValidTo" />
+                        <label for="service">Servisná prehliadka do</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">Uložiť</button>
+                <a href="platforms" class="btn btn-light px-4">Zrušiť</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private PlatformCreateDto model = new();
+
+    private async Task HandleSubmit()
+    {
+        await Service.CreateAsync(model);
+        Navigation.NavigateTo("platforms");
+    }
+}
+

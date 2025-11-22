@@ -1,0 +1,87 @@
+﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="layout-wrapper">
+    <!-- Sidebar -->
+    <aside class="layout-sidebar">
+        <NavMenu />
+    </aside>
+
+    <!-- Main Page -->
+    <div class="layout-page">
+        <!-- Navbar -->
+        <nav class="layout-navbar">
+            <div class="navbar-nav align-items-center">
+                <!-- Tu môže byť vyhľadávanie alebo breadcrumbs -->
+                <span class="text-muted small">Administrácia</span>
+            </div>
+
+            <div class="navbar-nav align-items-center ms-auto">
+                 <!-- User Profile -->
+                 <AuthorizeView>
+                     <Authorized>
+                        <div class="d-flex align-items-center">
+                            <div class="d-none d-md-block text-end me-3">
+                                <div class="fw-bold">@context.User.Identity?.Name</div>
+                                <div class="small text-muted">@context.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value</div>
+                            </div>
+                            <div class="avatar">
+                                <span class="avatar-initial rounded-circle bg-label-primary">
+                                    @GetInitials(context.User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value)
+                                </span>
+                            </div>
+                        </div>
+                     </Authorized>
+                 </AuthorizeView>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <div class="content-wrapper">
+            @Body
+        </div>
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+<style>
+    /* Inline štýly pre špecifické elementy MainLayoutu, ktoré neboli v app.css */
+    .avatar {
+        position: relative;
+        width: 2.375rem;
+        height: 2.375rem;
+        cursor: pointer;
+    }
+
+    .avatar-initial {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: var(--primary);
+        background-color: rgba(0, 92, 169, 0.15);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+</style>
+
+@code {
+    private string GetInitials(string? fullName)
+    {
+        if (string.IsNullOrEmpty(fullName)) return "U";
+        
+        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+        {
+            return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        }
+        return fullName.Substring(0, 1).ToUpper();
+    }
+}
